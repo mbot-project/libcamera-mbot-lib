@@ -37,3 +37,14 @@ Try doing this and running the camera node:
 ```
 export LD_LIBRARY_PATH=/usr/local/lib/aarch64-linux-gnu:$LD_LIBRARY_PATH
 ```
+
+Install for camera calib:
+```
+sudo apt install ros-jazzy-image-pipeline
+```
+
+April Tag detection
+```
+sudo apt install ros-jazzy-vision-opencv ros-jazzy-apriltag-msgs \
+                 libopencv-dev libopencv-contrib-dev
+```

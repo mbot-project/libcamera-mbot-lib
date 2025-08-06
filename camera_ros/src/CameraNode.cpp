@@ -217,8 +217,6 @@ compressImageMsg(const sensor_msgs::msg::Image &source,
     image = temp->image;
   }
 
-  cv::flip(image, image, -1);
-
   destination.format = "jpg";
   cv::imencode(".jpg", image, destination.data, params);
 }
@@ -657,12 +655,13 @@ CameraNode::process(libcamera::Request *const request)
         msg_img->is_bigendian = (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__);
         msg_img->data.resize(buffer_info[buffer].size);
         memcpy(msg_img->data.data(), buffer_info[buffer].data, buffer_info[buffer].size);
+        auto cv_ptr = cv_bridge::toCvCopy(*msg_img, msg_img->encoding);
+        cv::flip(cv_ptr->image, cv_ptr->image, -1);
+        *msg_img = *cv_ptr->toImageMsg();
 
         if (pub_image->get_subscription_count()) {
           try {
             auto cv_ptr = cv_bridge::toCvCopy(*msg_img, msg_img->encoding);
-            cv::flip(cv_ptr->image, cv_ptr->image, -1);
-            *msg_img = *cv_ptr->toImageMsg();
           } catch (const cv_bridge::Exception &e) {
             RCLCPP_ERROR_STREAM(get_logger(), "Flip failed: " << e.what());
           }
@@ -690,7 +689,7 @@ CameraNode::process(libcamera::Request *const request)
         // decompress into raw rgb8 image
         if (pub_image->get_subscription_count()){
           auto cv_ptr = cv_bridge::toCvCopy(*msg_img_compressed, "rgb8");
-          cv::flip(cv_ptr->image, cv_ptr->image, -1);
+          cv::flip(cv_ptr->image, cv_ptr->image, -1);   
           *msg_img = *cv_ptr->toImageMsg();
         }
       }
